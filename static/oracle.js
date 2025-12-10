@@ -72,8 +72,7 @@ function displayResults(data) {
     let html = '';
 
     // Process analysis_layers (array of layer objects)
-    const layers = data.analysis_layers || data.analysis?.analysis_layers || [];
-    
+    const layers = data.layers || data.analysis_layers || [];    
     if (layers.length > 0) {
         layers.forEach((layer, index) => {
             // Each layer is an object with one key (e.g., {"language_layer": {...}})
@@ -88,8 +87,7 @@ function displayResults(data) {
     }
 
     // Process synthesis (object)
-    const synthesis = data.synthesis || data.analysis?.synthesis || {};
-    if (Object.keys(synthesis).length > 0) {
+    const synthesis = data.synthesis || {};    if (Object.keys(synthesis).length > 0) {
         html += `<div class="result-item">`;
         html += `<h3>🔮 Síntese Integrada</h3>`;
         html += `<p>${formatLayerContent(synthesis)}</p>`;

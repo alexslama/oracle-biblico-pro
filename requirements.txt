@@ -2,12 +2,10 @@
 # Mac M1 Max & Google Cloud Optimized
 
 # Core LLM & RAG
-llama-cpp-python==0.2.30
-ollama==0.1.35
+ollama>=0.6.0
 langchain==0.1.20
 langchain-community==0.0.38
 langchain-text-splitters==0.0.1
-
 # Vector DB & Search
 chroma==0.4.24
 faiss-cpu==1.7.4.post2

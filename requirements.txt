@@ -1,32 +1,35 @@
 # Python Dependencies for Oracle Biblico PRO
 # Mac M1 Max & Google Cloud Optimized
+# Fixed for Python 3.12 Compatibility
 
 # Core LLM & RAG
 ollama>=0.6.0
-langchain==0.1.20
-langchain-community==0.0.38
-langchain-text-splitters==0.0.1
-# Vector DB & Search
-chroma==0.4.24
-faiss-cpu==1.7.4.post2
-pinecone-client==3.0.3
+langchain>=0.1.20,<0.2
+langchain-community>=0.0.38,<0.1
+langchain-text-splitters>=0.0.1,<0.1
+
+# Vector DB & Search (chromadb instead of chroma, compatible versions)
+chromadb>=0.4.0,<0.5
+# Removed faiss-cpu as it conflicts with M1 Mac Python 3.12
+# If you need FAISS, consider using chromadb's built-in vector db
+pinecone-client>=3.0.3,<4.0
 
 # Data Processing
-pandas==2.1.4
-numpy==1.24.3
-scikit-learn==1.3.2
+pandas>=2.1.0,<2.2
+numpy>=1.24.0,<2.0
+scikit-learn>=1.3.0,<1.4
 
 # Bible Text Processing
-python-docx==0.8.11
-pytest==7.4.3
-pytest-asyncio==0.21.1
+python-docx>=0.8.11,<1.0
+pytest>=7.4.0,<8.0
+pytest-asyncio>=0.21.0,<0.22
 
 # API & Web
-fastapi==0.109.0
-uvicorn==0.27.0
-requests==2.31.0
+fastapi>=0.109.0,<0.120
+uvicorn>=0.27.0,<0.28
+requests>=2.31.0,<3.0
 
 # Utilities
-python-dotenv==1.0.0
-pydantic==2.5.0
-pydantic-settings==2.1.0
+python-dotenv>=1.0.0,<2.0
+pydantic>=2.5.0,<3.0
+pydantic-settings>=2.1.0,<2.2

@@ -33,8 +33,11 @@ source venv/bin/activate
 echo "✓ Upgrading pip..."
 pip install --upgrade pip setuptools wheel
 
-# 5. Install dependencies
-echo "✓ Installing Python dependencies..."
+# 5b. Install remaining dependencies
+# 5a. Install PyTorch with M1 Metal acceleration
+echo "✓ Installing PyTorch with M1 GPU acceleration..."
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cpu
+
 pip install -r requirements.txt
 
 # 6. Create required directories

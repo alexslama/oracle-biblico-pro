@@ -287,4 +287,211 @@ Problemas ou dúvidas? Abra uma issue no GitHub!
 
 ---
 
+
+## 🚀 Como Usar
+
+### Opção 1: Interface Web (Recomendado)
+
+#### 1. Iniciar o servidor
+
+```bash
+# Ativar ambiente virtual
+source venv/bin/activate
+
+# Iniciar Flask
+python3 app.py
+```
+
+O servidor rodará em `http://localhost:5000`
+
+#### 2. Abrir no navegador
+
+- Acesse `http://localhost:5000` no seu navegador
+- Interface visual Matrix-style com autenticação
+- Análise em tempo real com 5 camadas bíblicas
+
+---
+
+### Opção 2: API REST (Programadores)
+
+#### 2.1. Health Check
+
+```bash
+curl http://localhost:5000/api/health
+```
+
+**Resposta:**
+```json
+{"status": "ok", "version": "1.0.0"}
+```
+
+#### 2.2. Analisar Texto Bíblico
+
+```bash
+curl -X POST http://localhost:5000/api/analyze \
+  -H "Content-Type: application/json" \
+  -d '{"query": "Profecia sobre cometa na biblia"}'
+```
+
+**Resposta (Exemplo):**
+```json
+{
+  "query": "Profecia sobre cometa na biblia",
+  "analysis": {
+    "linguistica": {"resultado": "..."},
+    "numerica": {"resultado": "..."},
+    "historica": {"resultado": "..."},
+    "teologica": {"resultado": "..."},
+    "integrada": {"resultado": "..."}
+  },
+  "timestamp": "2025-12-10T03:45:22"
+}
+```
+
+#### 2.3. Obter Resultados Anteriores
+
+```bash
+curl http://localhost:5000/api/results
+```
+
+---
+
+### Opção 3: CLI - Linha de Comando
+
+```bash
+# Ativar ambiente
+source venv/bin/activate
+
+# Executar análise
+python3 scripts/analysis_pipeline.py "Sua pergunta bíblica aqui"
+
+# Ver resultado em JSON formatado
+cat outputs/analysis_results.json | python3 -m json.tool
+```
+
+**Exemplo:**
+
+```bash
+python3 scripts/analysis_pipeline.py "Significado de Apocalipse 12:1"
+```
+
+Resultados salvos em: `outputs/analysis_results.json`
+
+---
+
+### Opção 4: Integração com Open WebUI
+
+#### Se você usa Open WebUI (Ollama):
+
+```bash
+# Terminal 1: Iniciar ollama (se necessário)
+ollama serve
+
+# Terminal 2: Iniciar Flask API
+source venv/bin/activate
+python3 app.py
+
+# Terminal 3: Acessar Open WebUI
+# http://localhost:3000
+```
+
+Configure o modelo customizado para chamar:
+```
+http://localhost:5000/api/analyze
+```
+
+---
+
+## 🔧 Configurações
+
+### Variáveis de Ambiente
+
+Crie um `.env` file (opcional):
+
+```env
+FLASK_ENV=development
+FLASK_PORT=5000
+LLAMA_MODEL=llama2
+RAG_ENABLED=true
+CHROMA_DB_PATH=./chromadb
+```
+
+### Melhorar Performance
+
+**M1/M2 Mac:**
+```bash
+# Use aceleração GPU
+export PYTORCH_ENABLE_MPS_FALLBACK=1
+python3 app.py
+```
+
+**Google Cloud:**
+```bash
+# Deploy com gcloud
+gcloud app deploy
+```
+
+---
+
+## 📊 Exemplos de Queries Bíblicas
+
+```bash
+# Análise de passagens
+"Qual é o significado de João 1:1?"
+
+# Análise de conceitos
+"O que significa 'Logos' no Evangelho de João?"
+
+# Análise de profecias
+"Profecia sobre cometa na Bíblia"
+
+# Análise de números
+"Significado numerológico de 666 em Apocalipse"
+
+# Análise histórica
+"Contexto histórico de Belém no nascimento de Jesus"
+```
+
+---
+
+## 🐛 Troubleshooting
+
+### Problema: Porta 5000 já em uso
+
+```bash
+# Encontrar processo usando porta
+lsof -ti:5000 | xargs kill -9
+
+# Ou usar outra porta
+FLASK_PORT=5001 python3 app.py
+```
+
+### Problema: ModuleNotFoundError
+
+```bash
+# Reinstalar dependências
+source venv/bin/activate
+pip install --upgrade -r requirements.txt
+```
+
+### Problema: Erro de Python 3.15
+
+```bash
+# Usar Python 3.12
+brew install python@3.12
+python3.12 -m venv venv_new
+source venv_new/bin/activate
+pip install -r requirements.txt
+```
+
+---
+
+## 💱 Próximos Passos
+
+- [ ] Deploy em produção (Heroku/AWS/GCP)
+- [ ] Adicionar autenticação OAuth2
+- [ ] Mobile app (React Native)
+- [ ] Dashboard de análises históricas
+- [ ] Exportar resultados (PDF/Excel)
+
 **Criado com ❤️ para questão bíblica profunda e análise estruturada**

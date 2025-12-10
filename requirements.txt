@@ -18,6 +18,7 @@ pinecone-client>=3.0.3,<4.0
 pandas>=2.1.0,<2.2
 numpy>=1.24.0,<2.0
 scikit-learn>=1.3.0,<1.4
+scipy>=1.10.0,<2.0
 
 # Bible Text Processing
 python-docx>=0.8.11,<1.0

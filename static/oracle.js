@@ -6,47 +6,40 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeApp() {
-  // Get elements
-  const analisarBtn = document.getElementById('analisar-btn');
-  const queryInput = document.getElementById('query-input');
+  // Get form element
+  const form = document.getElementById('analysisForm');
   
-  if (analisarBtn) {
-    analisarBtn.addEventListener('click', handleAnalysis);
-  }
-  
-  if (queryInput) {
-    queryInput.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        handleAnalysis();
-      }
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      handleAnalysis();
     });
   }
-  
-  // Generate binary rain
-  generateBinaryRain();
-  
-  // Add hover effects
-  addHoverEffects();
 }
 
 // Handle analysis submission
 async function handleAnalysis() {
-  const query = document.getElementById('query-input')?.value;
+  const queryInput = document.getElementById('queryInput');
+  const query = queryInput?.value;
   
   if (!query || query.trim() === '') {
-    showError('Por favor, digite uma pergunta bíbliCa');
+    showError('Por favor, digite uma pergunta bíblica');
     return;
   }
   
-  const resultsDiv = document.getElementById('results');
+  // Show results section and hide error
+  const resultsSection = document.getElementById('resultsSection');
+  const errorSection = document.getElementById('errorSection');
   const statusDiv = document.getElementById('status');
   
-  if (statusDiv) {
-    statusDiv.innerHTML = '<span class="status"></span> Processando com Llama 3.1 + RAG...';
+  if (resultsSection) {
+    resultsSection.classList.remove('hidden');
   }
-  
-  if (resultsDiv) {
-    resultsDiv.innerHTML = '';
+  if (errorSection) {
+    errorSection.classList.add('hidden');
+  }
+  if (statusDiv) {
+    statusDiv.innerHTML = '<span class="status-dot"></span> <span>Processando...</span>';
   }
   
   try {
@@ -63,7 +56,7 @@ async function handleAnalysis() {
     if (response.ok) {
       displayResults(data);
       if (statusDiv) {
-        statusDiv.innerHTML = '<span class="status"></span> Análise concluída';
+        statusDiv.innerHTML = '<span class="status-dot"></span> <span>Análise concluída</span>';
       }
     } else {
       showError(data.error || 'Erro ao processar a análise');
@@ -78,80 +71,61 @@ function displayResults(data) {
   const resultsDiv = document.getElementById('results');
   if (!resultsDiv) return;
   
-  let html = '<div class="result-item">';
+  let html = '';
   
-  if (data.linguistic_analysis) {
-    html += '<div class="result-label">Lingüística</div>';
-    html += '<div class="result-value">' + escapeHtml(data.linguistic_analysis) + '</div>';
+  // Map of result keys to display labels
+  const resultMap = {
+    'linguistic_analysis': 'Lingüística',
+    'hebrew_greek_analysis': 'Hebráico/Grego Antigos',
+    'numeric_analysis': 'Númérica',
+    'gematria_analysis': 'Gematria com Valores Hebraicos',
+    'historical_analysis': 'Histórica',
+    'archaeological_context': 'Contexto Arqueológico',
+    'theological_analysis': 'Teológica',
+    'divine_concepts': 'Conceitos Divinos',
+    'integrated_synthesis': 'Síntese Integrada',
+    'complete_conclusion': 'Conclusão Completa da Análise'
+  };
+  
+  // Build results HTML
+  for (const [key, label] of Object.entries(resultMap)) {
+    if (data[key]) {
+      html += '<div class="result-item">';
+      html += '<div class="result-label">' + label + '</div>';
+      html += '<div class="result-value">' + escapeHtml(data[key]) + '</div>';
+      html += '</div>';
+    }
   }
   
-  if (data.hebrew_greek_analysis) {
-    html += '<div class="result-label">Hebraico/Grego Antigos</div>';
-    html += '<div class="result-value">' + escapeHtml(data.hebrew_greek_analysis) + '</div>';
-  }
-  
-  if (data.numeric_analysis) {
-    html += '<div class="result-label">Numérica</div>';
-    html += '<div class="result-value">' + escapeHtml(data.numeric_analysis) + '</div>';
-  }
-  
-  if (data.gematria_analysis) {
-    html += '<div class="result-label">Gematria com Valores Hebraicos</div>';
-    html += '<div class="result-value">' + escapeHtml(data.gematria_analysis) + '</div>';
-  }
-  
-  if (data.historical_analysis) {
-    html += '<div class="result-label">Histórica</div>';
-    html += '<div class="result-value">' + escapeHtml(data.historical_analysis) + '</div>';
-  }
-  
-  if (data.archaeological_context) {
-    html += '<div class="result-label">Contexto Arqueológico</div>';
-    html += '<div class="result-value">' + escapeHtml(data.archaeological_context) + '</div>';
-  }
-  
-  if (data.theological_analysis) {
-    html += '<div class="result-label">Teológica</div>';
-    html += '<div class="result-value">' + escapeHtml(data.theological_analysis) + '</div>';
-  }
-  
-  if (data.divine_concepts) {
-    html += '<div class="result-label">Conceitos Divinos</div>';
-    html += '<div class="result-value">' + escapeHtml(data.divine_concepts) + '</div>';
-  }
-  
-  if (data.integrated_synthesis) {
-    html += '<div class="result-label">Síntese Integrada</div>';
-    html += '<div class="result-value">' + escapeHtml(data.integrated_synthesis) + '</div>';
-  }
-  
-  if (data.complete_conclusion) {
-    html += '<div class="result-label">Conclusão Completa da Análise</div>';
-    html += '<div class="result-value">' + escapeHtml(data.complete_conclusion) + '</div>';
-  }
-  
-  html += '</div>';
   resultsDiv.innerHTML = html;
   
-  // Add animation
+  // Smooth fade-in animation
   resultsDiv.style.opacity = '0';
   setTimeout(() => {
-    resultsDiv.style.transition = 'opacity 0.5s ease';
+    resultsDiv.style.transition = 'opacity 0.3s ease-in';
     resultsDiv.style.opacity = '1';
   }, 10);
 }
 
 // Show error message
 function showError(message) {
-  const resultsDiv = document.getElementById('results');
-  if (resultsDiv) {
-    resultsDiv.innerHTML = '<div class="panel" style="color: #ff6b6b; border-color: #ff6b6b;">' + 
-                           '<strong>ERRO:</strong> ' + escapeHtml(message) + '</div>';
+  const resultsSection = document.getElementById('resultsSection');
+  const errorSection = document.getElementById('errorSection');
+  const errorMessage = document.getElementById('errorMessage');
+  
+  if (resultsSection) {
+    resultsSection.classList.add('hidden');
+  }
+  if (errorSection) {
+    errorSection.classList.remove('hidden');
+  }
+  if (errorMessage) {
+    errorMessage.innerHTML = escapeHtml(message);
   }
   
   const statusDiv = document.getElementById('status');
   if (statusDiv) {
-    statusDiv.innerHTML = '<span style="color: #ff6b6b;">Erro na análise</span>';
+    statusDiv.innerHTML = '<span class="status-dot"></span> <span style="color: #ff6b6b;">Erro na análise</span>';
   }
 }
 
@@ -166,31 +140,4 @@ function escapeHtml(text) {
     "'": '&#039;'
   };
   return text.toString().replace(/[&<>"']/g, m => map[m]);
-}
-
-// Generate random binary text for the rain effect
-function generateBinaryRain() {
-  const binaryRain = document.querySelector('.binary-rain');
-  if (!binaryRain) return;
-  
-  const binary = '01'.repeat(100);
-  binaryRain.textContent = binary;
-}
-
-// Add hover effects to panels
-function addHoverEffects() {
-  const panels = document.querySelectorAll('.panel');
-  panels.forEach(panel => {
-    panel.addEventListener('mouseenter', function() {
-      this.style.transform = 'translateY(-2px)';
-    });
-    panel.addEventListener('mouseleave', function() {
-      this.style.transform = 'translateY(0)';
-    });
-  });
-}
-
-// Utility function to format timestamp
-function formatTimestamp() {
-  return new Date().toLocaleString('pt-BR');
 }

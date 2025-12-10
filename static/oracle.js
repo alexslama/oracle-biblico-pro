@@ -52,6 +52,7 @@ async function handleAnalysis() {
 
         if (response.ok) {
             displayResults(data);
+                    console.log('DEBUG - Received data:', data);
             if (statusDiv) {
                 statusDiv.innerHTML = '✅ Análise concluída';
             }

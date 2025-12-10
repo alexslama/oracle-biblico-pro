@@ -49,10 +49,10 @@ async function handleAnalysis() {
         });
 
         const data = await response.json();
+        console.log('DEBUG - Received data:', data);
 
         if (response.ok) {
             displayResults(data);
-                    console.log('DEBUG - Received data:', data);
             if (statusDiv) {
                 statusDiv.innerHTML = '✅ Análise concluída';
             }
@@ -71,39 +71,37 @@ function displayResults(data) {
 
     let html = '';
 
-    // Get analysis from the response
-    const analysis = data.analysis || {};
-
-    // Map of result keys to display labels
-    const resultMap = {
-        'linguistic_analysis': 'Análise Linguística',
-        'hebrew_greek_analysis': 'Análise Hebraico/Grego',
-        'numeric_analysis': 'Análise Numérica',
-        'gematria_analysis': 'Gematria com Valores Hebraicos',
-        'historical_analysis': 'Análise Histórica',
-        'archaeological_context': 'Contexto Arqueológico',
-        'theological_analysis': 'Análise Teológica',
-        'divine_concepts': 'Conceitos Divinos',
-        'integrated_synthesis': 'Síntese Integrada',
-        'complete_conclusion': 'Conclusão Completa'
-    };
-
-    // Build results HTML
-    for (const [key, label] of Object.entries(resultMap)) {
-        if (analysis[key]) {
-            html += `<div class="result-item">`;
-            html += `<h3>${label}</h3>`;
-            html += `<p>${escapeHtml(analysis[key])}</p>`;
-            html += `</div>`;
-        }
+    // Process analysis_layers (array of layer objects)
+    const layers = data.analysis_layers || data.analysis?.analysis_layers || [];
+    
+    if (layers.length > 0) {
+        layers.forEach((layer, index) => {
+            // Each layer is an object with one key (e.g., {"language_layer": {...}})
+            for (const [layerKey, layerData] of Object.entries(layer)) {
+                const layerTitle = formatLayerTitle(layerKey);
+                html += `<div class="result-item">`;
+                html += `<h3>${layerTitle}</h3>`;
+                html += `<p>${formatLayerContent(layerData)}</p>`;
+                html += `</div>`;
+            }
+        });
     }
 
+    // Process synthesis (object)
+    const synthesis = data.synthesis || data.analysis?.synthesis || {};
+    if (Object.keys(synthesis).length > 0) {
+        html += `<div class="result-item">`;
+        html += `<h3>🔮 Síntese Integrada</h3>`;
+        html += `<p>${formatLayerContent(synthesis)}</p>`;
+        html += `</div>`;
+    }
+
+    // Fallback: display raw data if no layers found
     if (html === '') {
-        // Fallback: display raw analysis if no specific keys found
-        html = `<div class="result-item">
-                    <h3>Revelação do Oráculo</h3>
-                    <p>${escapeHtml(JSON.stringify(analysis, null, 2))}</p>
-                </div>`;
+        html = `<div class="result-item">`;
+        html += `<h3>Revelação do Oráculo</h3>`;
+        html += `<p>${escapeHtml(JSON.stringify(data, null, 2))}</p>`;
+        html += `</div>`;
     }
 
     resultsDiv.innerHTML = html;
@@ -114,6 +112,46 @@ function displayResults(data) {
         resultsDiv.style.transition = 'opacity 0.3s ease-in';
         resultsDiv.style.opacity = '1';
     }, 10);
+}
+
+// Format layer title from key
+function formatLayerTitle(key) {
+    const titleMap = {
+        'language_layer': '📜 Camada Linguística',
+        'numerical_layer': '🔢 Camada Numérica (Gematria)',
+        'historical_layer': '🏛️ Camada Histórica e Arqueológica',
+        'theological_layer': '✨ Camada Teológica',
+        'integrated_synthesis': '🔮 Síntese Integrada'
+    };
+    return titleMap[key] || key.replace(/_/g, ' ').toUpperCase();
+}
+
+// Format layer content (object or array to readable text)
+function formatLayerContent(content) {
+    if (typeof content === 'string') {
+        return escapeHtml(content);
+    }
+    
+    if (Array.isArray(content)) {
+        return escapeHtml(content.join(', '));
+    }
+    
+    if (typeof content === 'object' && content !== null) {
+        let text = '';
+        for (const [key, value] of Object.entries(content)) {
+            const label = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            if (Array.isArray(value)) {
+                text += `<strong>${label}:</strong> ${escapeHtml(value.join(', '))}<br>`;
+            } else if (typeof value === 'object') {
+                text += `<strong>${label}:</strong> ${escapeHtml(JSON.stringify(value))}<br>`;
+            } else {
+                text += `<strong>${label}:</strong> ${escapeHtml(String(value))}<br>`;
+            }
+        }
+        return text || escapeHtml(JSON.stringify(content));
+    }
+    
+    return escapeHtml(String(content));
 }
 
 // Show error message

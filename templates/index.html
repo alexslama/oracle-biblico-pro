@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oracle Bíblico PRO - Análise Bíblica Profissional</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="matrix-background">
+        <div class="matrix-text">01001101 01100001 01110100 01110010 01101001 01111000</div>
+    </div>
+    
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo-section">
+                <div class="logo">+ 🔮 +</div>
+                <h1>Oracle Bíblico PRO</h1>
+                <p class="subtitle">Sistema de Análise Bíblica Profissional com IA</p>
+            </div>
+            <div class="status-indicator" id="status">
+                <span class="status-dot"></span>
+                <span>Conectado</span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Input Section -->
+            <section class="input-section">
+                <div class="section-title">> Inserir Query Bíblica</div>
+                <form id="analysisForm" class="form-group">
+                    <textarea 
+                        id="queryInput" 
+                        class="query-input" 
+                        placeholder="Digite sua pergunta bíblica... Ex: Qual é o significado de João 1:1?"
+                        rows="4"
+                    ></textarea>
+                    <button type="submit" class="btn-analyze">
+                        <span class="btn-text">ANALISAR</span>
+                        <span class="btn-glow"></span>
+                    </button>
+                </form>
+            </section>
+
+            <!-- Loading Spinner -->
+            <div id="loading" class="loading hidden">
+                <div class="spinner"></div>
+                <p>Processando com Llama 3.1 + RAG...</p>
+            </div>
+
+            <!-- Results Section -->
+            <section id="resultsSection" class="results-section hidden">
+                <div class="section-title">> Resultado da Análise</div>
+                
+                <!-- Analysis Grid -->
+                <div class="analysis-grid">
+                    <!-- Lingüística -->
+                    <div class="analysis-card">
+                        <div class="card-header">Lingüística</div>
+                        <div class="card-header-sub">Hebráico/Grego Antigos</div>
+                        <div class="card-content" id="linguistica-result"></div>
+                    </div>
+                    
+                    <!-- Numérica -->
+                    <div class="analysis-card">
+                        <div class="card-header">Numérica</div>
+                        <div class="card-header-sub">Gematria com Valores Hebraicos</div>
+                        <div class="card-content" id="numerica-result"></div>
+                    </div>
+                    
+                    <!-- Histórica -->
+                    <div class="analysis-card">
+                        <div class="card-header">Histórica</div>
+                        <div class="card-header-sub">Contexto Arqueológico</div>
+                        <div class="card-content" id="historica-result"></div>
+                    </div>
+                    
+                    <!-- Teólogica -->
+                    <div class="analysis-card">
+                        <div class="card-header">Teólogica</div>
+                        <div class="card-header-sub">Conceitos Divinos</div>
+                        <div class="card-content" id="teologica-result"></div>
+                    </div>
+                    
+                    <!-- Integrada -->
+                    <div class="analysis-card full-width">
+                        <div class="card-header">Síntese Integrada</div>
+                        <div class="card-header-sub">Conclusão Completa da Análise</div>
+                        <div class="card-content" id="integrada-result"></div>
+                    </div>
+                </div>
+
+                <!-- Metadata -->
+                <div class="metadata">
+                    <span>Query: <span id="metaQuery"></span></span>
+                    <span>Timestamp: <span id="metaTime"></span></span>
+                </div>
+            </section>
+
+            <!-- Error Section -->
+            <div id="errorSection" class="error-section hidden">
+                <div class="error-header">> ERRO</div>
+                <div id="errorMessage" class="error-message"></div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>💫 Criado com ♥ para questão bíblica profunda e análise estruturada</p>
+            <p>Powered by Llama 3.1 + ChromaDB RAG</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/interface.js') }}"></script>
+</body>
+</html>

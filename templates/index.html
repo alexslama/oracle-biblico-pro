@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shamir - Oráculo Bíblico Profissional</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='oracle.css') }}">
+    <script src="{{ url_for('static', filename='oracle.js') }}"></script>
 </head>
 <body>
     <div class="matrix-background">
@@ -34,16 +35,15 @@
                     <textarea
                         id="queryInput"
                         class="query-input"
-                        placeholder="Digite sua pergunta bíblica... Ex: Qual é o significado de João 1:1?"
-                        rows="4"
-                    ></textarea>
+                        placeholder="Digite sua pergunta bíblia... Ex: Qual é o significado de João 1:1?"
+                        rows="4"></textarea>
                     <button type="submit" class="btn-analyze">CONSULTAR</button>
                 </form>
             </section>
 
             <!-- Results Section -->
             <section id="resultsSection" class="results-section hidden">
-                <div class="section-title">> Revelação do Oráculo</div>
+                <div class="section-title">> REVELAÇÃO DO ORÁCULO</div>
                 <div id="results" class="results-content"></div>
             </section>
 
@@ -60,7 +60,5 @@
             <p>Powered by Llama 3.1 + ChromaDB RAG | SHAMIR Oráculo Bíblico</p>
         </footer>
     </div>
-
-    <script src="{{ url_for('static', filename='oracle.js') }}"></script>
 </body>
 </html>

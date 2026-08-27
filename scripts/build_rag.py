@@ -40,7 +40,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--input",
-        default="data/processed/training_data.jsonl",
+        default="data/demo_corpus.jsonl",
         help="JSONL file containing records with a text field",
     )
     parser.add_argument(

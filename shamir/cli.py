@@ -12,6 +12,7 @@ from typing import Any, Dict
 
 from scripts.analysis_pipeline import BiblicalAnalysisPipeline
 from scripts.rag_store import ChromaRAGStore, load_jsonl_documents
+from shamir.evaluation import evaluate_result
 
 
 def _print_json(payload: Dict[str, Any]) -> None:
@@ -26,14 +27,23 @@ def command_doctor(_: argparse.Namespace) -> int:
         "llm_requested": os.getenv("SHAMIR_ENABLE_LLM", "0"),
         "ollama_python": False,
         "chromadb_python": False,
+        "ollama_service": False,
     }
     try:
-        import ollama  # noqa: F401
+        import ollama
+
         checks["ollama_python"] = True
+        try:
+            ollama.list()
+            checks["ollama_service"] = True
+        except Exception as exc:
+            checks["ollama_service_error"] = str(exc)
     except Exception as exc:
         checks["ollama_error"] = str(exc)
+
     try:
         import chromadb  # noqa: F401
+
         checks["chromadb_python"] = True
     except Exception as exc:
         checks["chromadb_error"] = str(exc)
@@ -41,6 +51,9 @@ def command_doctor(_: argparse.Namespace) -> int:
     checks["ready_for_base_mode"] = True
     checks["ready_for_rag_dependencies"] = bool(
         checks["ollama_python"] and checks["chromadb_python"]
+    )
+    checks["ready_for_local_rag"] = bool(
+        checks["ready_for_rag_dependencies"] and checks["ollama_service"]
     )
     _print_json(checks)
     return 0
@@ -73,6 +86,23 @@ def command_build_rag(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_evaluate(args: argparse.Namespace) -> int:
+    result_path = Path(args.input)
+    if not result_path.exists():
+        _print_json({"error": f"Result file not found: {result_path}"})
+        return 2
+
+    try:
+        result = json.loads(result_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        _print_json({"error": f"Could not read result JSON: {exc}"})
+        return 2
+
+    report = evaluate_result(result)
+    _print_json(report)
+    return 0 if report["passed"] else 2
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="shamir",
@@ -94,6 +124,13 @@ def build_parser() -> argparse.ArgumentParser:
     build_rag.add_argument("--collection", default="shamir_sources")
     build_rag.add_argument("--embedding-model", default="nomic-embed-text")
     build_rag.set_defaults(func=command_build_rag)
+
+    evaluate = subparsers.add_parser(
+        "evaluate",
+        help="Audit citation-label integrity in a saved SHAMIR result.",
+    )
+    evaluate.add_argument("--input", default="outputs/analysis_results.json")
+    evaluate.set_defaults(func=command_evaluate)
     return parser
 
 

@@ -1,5 +1,7 @@
 # SHAMIR — Local-First Biblical Research Toolkit
 
+[![Tests](https://github.com/alexslama/oracle-biblico-pro/actions/workflows/tests.yml/badge.svg)](https://github.com/alexslama/oracle-biblico-pro/actions/workflows/tests.yml)
+
 SHAMIR is an open-source experimental toolkit for source-aware biblical-text research using local language models, Retrieval-Augmented Generation (RAG), and a transparent Flask API.
 
 The project is designed so users can inspect the full workflow: local corpus, embeddings, vector store, retrieved passages, prompts, generated analysis, warnings, and persisted JSON output.

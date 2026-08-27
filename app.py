@@ -11,6 +11,14 @@ from pathlib import Path
 from flask import Flask, jsonify, render_template, request
 from flask_cors import CORS
 
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv()
+except ImportError:
+    # `.env` loading is convenient locally but not required for the core app.
+    pass
+
 sys.path.insert(0, str(Path(__file__).parent / "scripts"))
 from analysis_pipeline import BiblicalAnalysisPipeline  # noqa: E402
 
@@ -51,9 +59,17 @@ def analyze():
         result = pipeline.analyze(query)
     except ValueError as exc:
         return jsonify({"status": "error", "message": str(exc)}), 400
-    except Exception as exc:
+    except Exception:
         app.logger.exception("SHAMIR analysis failed")
-        return jsonify({"status": "error", "message": str(exc)}), 500
+        return (
+            jsonify(
+                {
+                    "status": "error",
+                    "message": "Analysis failed. Check server logs and local model configuration.",
+                }
+            ),
+            500,
+        )
 
     return jsonify({"status": "success", **result}), 200
 
@@ -69,9 +85,9 @@ def get_results():
         with results_file.open("r", encoding="utf-8") as handle:
             results = json.load(handle)
         return jsonify({"status": "success", "results": results}), 200
-    except (OSError, json.JSONDecodeError) as exc:
+    except (OSError, json.JSONDecodeError):
         app.logger.exception("Failed to read persisted SHAMIR results")
-        return jsonify({"status": "error", "message": str(exc)}), 500
+        return jsonify({"status": "error", "message": "Stored results could not be read"}), 500
 
 
 @app.route("/api/health")

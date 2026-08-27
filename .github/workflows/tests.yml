@@ -21,11 +21,14 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
 
-      - name: Install test dependencies
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install "Flask>=3.0,<4.0" "flask-cors>=4.0,<6.0" "pytest>=7.4,<9.0"
+          pip install -r requirements-dev.txt
 
       - name: Run tests
         env:

@@ -1,0 +1,8 @@
+{"id":"demo-001","question":"What does the demo corpus say about Genesis and its canonical position?","topics":["Genesis"]}
+{"id":"demo-002","question":"How does the demo corpus describe the term Torah?","topics":["Torah"]}
+{"id":"demo-003","question":"What cautions does the corpus give about detailed Hebrew-language claims?","topics":["Torah"]}
+{"id":"demo-004","question":"Which kinds of questions can biblical interpretation involve according to the demo corpus?","topics":["interpretation"]}
+{"id":"demo-005","question":"Does the demo corpus say that interpretive traditions always agree?","topics":["interpretation"]}
+{"id":"demo-006","question":"Does Retrieval-Augmented Generation prove a conclusion is correct?","topics":["methodology"]}
+{"id":"demo-007","question":"Which factors does the demo corpus say require independent evaluation in a RAG system?","topics":["methodology"]}
+{"id":"demo-008","question":"Explain the difference between a retrieved source and a verified scholarly conclusion using only the demo corpus.","topics":["methodology","interpretation"]}

@@ -2,71 +2,109 @@
 
 Thank you for your interest in contributing to SHAMIR.
 
-SHAMIR is an early-stage open-source project exploring structured biblical-text analysis, local language models, and Retrieval-Augmented Generation (RAG). The project is still evolving, so contributions that improve correctness, reproducibility, testing, documentation, and modularity are especially welcome.
+SHAMIR is an experimental open-source project exploring local-first Retrieval-Augmented Generation, local language models, transparent source context, and reproducible AI-assisted research workflows.
 
-## Ways to contribute
+## Good contribution areas
 
-You can help by:
+Contributions are especially welcome in:
 
-- fixing bugs or dependency issues;
-- improving documentation and examples;
-- adding or improving tests;
-- improving the analysis pipeline;
-- replacing prototype or simulated RAG components with real retrieval and embedding implementations;
-- improving source attribution and evaluation;
-- improving support for local models and Apple Silicon;
-- proposing clearer APIs or reusable components.
+- retrieval quality and corpus ingestion;
+- Ollama/model-provider abstractions;
+- ChromaDB/vector-store abstractions;
+- groundedness and hallucination evaluation;
+- source attribution and citation validation;
+- tests and CI;
+- dependency/security improvements;
+- documentation and examples;
+- Hebrew / Greek / Aramaic processing backed by verifiable resources;
+- accessibility and web-interface improvements.
 
 ## Development setup
 
-1. Fork or clone the repository.
-2. Create a virtual environment:
-
 ```bash
+git clone https://github.com/alexslama/oracle-biblico-pro.git
+cd oracle-biblico-pro
 python3.12 -m venv venv
 source venv/bin/activate
+pip install -r requirements-dev.txt
+pytest -q
 ```
 
-3. Install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-4. Run the web application:
+Run the web app with:
 
 ```bash
 python3 app.py
 ```
 
-The application is served locally at `http://localhost:5000` by default.
+The default server is `http://127.0.0.1:5000`.
+
+## Optional local AI stack
+
+Unit tests do not require Ollama. For live RAG experiments, install/start Ollama and follow [QUICK_START.md](QUICK_START.md).
+
+Do not make the default test suite depend on downloading large models or external proprietary services. Integration tests that need local models should be clearly separated and documented.
 
 ## Pull requests
 
-Before opening a pull request:
+Please:
 
-- keep the change focused;
-- explain what problem it solves;
-- include tests when changing behavior where practical;
-- update documentation when behavior or setup changes;
-- avoid committing credentials, private datasets, generated model files, or secrets.
+- keep changes focused;
+- explain the problem before the implementation;
+- add or update tests when behavior changes;
+- update documentation when setup or API behavior changes;
+- preserve transparent failure states instead of hiding errors;
+- avoid unsupported scientific, medical, historical, linguistic, or theological claims;
+- avoid committing credentials, `.env` files, private corpora, model weights, generated vector stores, or sensitive outputs.
 
-A good pull request description should include:
+A useful PR description includes:
 
 - what changed;
 - why it changed;
 - how it was tested;
-- any known limitations or follow-up work.
+- known limitations;
+- follow-up work, if any.
+
+## Corpus and licensing rules
+
+Only add corpus material that the project is legally allowed to redistribute. Do not commit copyrighted translations, commentaries, academic databases, scraped paywalled sources, or private user material without explicit rights.
+
+When adding a reusable corpus or benchmark, document:
+
+- provenance;
+- license/redistribution terms;
+- transformation steps;
+- intended evaluation use;
+- known limitations or bias.
+
+## Research-quality principles
+
+SHAMIR should distinguish:
+
+- retrieved evidence from generated interpretation;
+- verifiable claims from uncertainty;
+- theological tradition from historical evidence;
+- numerical/gematria interpretation from empirical fact;
+- demo fixtures from scholarly corpora;
+- implemented behavior from roadmap ideas.
+
+A feature should not be described as implemented until the code path genuinely performs it.
+
+## Security
+
+Review [SECURITY.md](SECURITY.md). Local model output is untrusted, and local corpora may contain sensitive information. Avoid patterns that execute model output or expose local files without validation.
 
 ## Issues
 
-When reporting a bug, include your operating system, Python version, steps to reproduce, expected behavior, actual behavior, and any relevant error output.
+For bugs, include:
 
-For feature requests, describe the use case first and the proposed implementation second.
+- operating system;
+- Python version;
+- steps to reproduce;
+- expected behavior;
+- actual behavior;
+- relevant logs with secrets removed.
 
-## Project principles
-
-SHAMIR aims to be transparent about what is implemented versus experimental. Claims about historical, linguistic, theological, or numerical analysis should be treated as research output requiring verification, not as authoritative truth.
+For feature requests, describe the user/research problem first and the proposed implementation second.
 
 ## License
 

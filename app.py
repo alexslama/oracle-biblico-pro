@@ -1,99 +1,97 @@
 #!/usr/bin/env python3
-"""
-Oracle Biblico PRO - Web Interface with Matrix-like Biblical Theme
-Modern API backend with enhanced analysis pipeline
-"""
+"""SHAMIR Flask web application."""
 
-from flask import Flask, render_template, request, jsonify, send_from_directory
-from flask_cors import CORS
+from __future__ import annotations
+
 import json
-from pathlib import Path
-from typing import Dict, List
+import os
 import sys
-sys.path.insert(0, str(Path(__file__).parent / 'scripts'))
+from pathlib import Path
 
-from analysis_pipeline import BiblicalAnalysisPipeline
+from flask import Flask, jsonify, render_template, request
+from flask_cors import CORS
 
-app = Flask(__name__, template_folder='templates', static_folder='static')
+sys.path.insert(0, str(Path(__file__).parent / "scripts"))
+from analysis_pipeline import BiblicalAnalysisPipeline  # noqa: E402
+
+
+app = Flask(__name__, template_folder="templates", static_folder="static")
 CORS(app)
-
-# Initialize pipeline
 pipeline = BiblicalAnalysisPipeline()
 
-# Routes
-@app.route('/')
+MAX_QUERY_LENGTH = int(os.getenv("SHAMIR_MAX_QUERY_LENGTH", "4000"))
+
+
+@app.route("/")
 def index():
-    """Serve main interface"""
-    return render_template('index.html')
+    """Serve the main web interface."""
+    return render_template("index.html")
 
-@app.route('/api/analyze', methods=['POST'])
+
+@app.route("/api/analyze", methods=["POST"])
 def analyze():
-    """API endpoint for biblical analysis"""
+    """Analyze a research question with the configured SHAMIR pipeline."""
+    data = request.get_json(silent=True) or {}
+    query = str(data.get("query", "")).strip()
+
+    if not query:
+        return jsonify({"status": "error", "message": "Query is required"}), 400
+    if len(query) > MAX_QUERY_LENGTH:
+        return (
+            jsonify(
+                {
+                    "status": "error",
+                    "message": f"Query exceeds the {MAX_QUERY_LENGTH}-character limit",
+                }
+            ),
+            400,
+        )
+
     try:
-        data = request.get_json()
-        query = data.get('query', '')
-        
-        if not query:
-            return jsonify({'error': 'Query is required'}), 400
-        
-        # Execute analysis
         result = pipeline.analyze(query)
-        
-        return jsonify({
-            'status': 'success',
-            'query': query,
-            'analysis': result,
-            'layers': result.get('analysis_layers', []),
-            'synthesis': result.get('synthesis', {})
-        }), 200
-    
-    except Exception as e:
-        return jsonify({
-            'status': 'error',
-            'message': str(e)
-        }), 500
+    except ValueError as exc:
+        return jsonify({"status": "error", "message": str(exc)}), 400
+    except Exception as exc:
+        app.logger.exception("SHAMIR analysis failed")
+        return jsonify({"status": "error", "message": str(exc)}), 500
 
-@app.route('/api/results')
+    return jsonify({"status": "success", **result}), 200
+
+
+@app.route("/api/results")
 def get_results():
-    """Retrieve last analysis results"""
+    """Retrieve the most recently persisted analysis result."""
+    results_file = Path("outputs/analysis_results.json")
+    if not results_file.exists():
+        return jsonify({"status": "error", "message": "No results found"}), 404
+
     try:
-        results_file = Path('outputs/analysis_results.json')
-        if results_file.exists():
-            with open(results_file, 'r', encoding='utf-8') as f:
-                results = json.load(f)
-            return jsonify({
-                'status': 'success',
-                'results': results
-            }), 200
-        else:
-            return jsonify({
-                'status': 'error',
-                'message': 'No results found'
-            }), 404
-    except Exception as e:
-        return jsonify({
-            'status': 'error',
-            'message': str(e)
-        }), 500
+        with results_file.open("r", encoding="utf-8") as handle:
+            results = json.load(handle)
+        return jsonify({"status": "success", "results": results}), 200
+    except (OSError, json.JSONDecodeError) as exc:
+        app.logger.exception("Failed to read persisted SHAMIR results")
+        return jsonify({"status": "error", "message": str(exc)}), 500
 
-@app.route('/api/health')
+
+@app.route("/api/health")
 def health():
-    """Health check endpoint"""
-    return jsonify({
-        'status': 'healthy',
-        'service': 'Oracle Biblico PRO',
-        'version': '1.0.0'
-    }), 200
+    """Report service and optional local-AI component status."""
+    return (
+        jsonify(
+            {
+                "status": "healthy",
+                "service": "SHAMIR",
+                "version": "1.1.0",
+                "pipeline": pipeline.health(),
+            }
+        ),
+        200,
+    )
 
-if __name__ == '__main__':
-    print("")
-    print("╔════════════════════════════════════════════════════════════╗")
-    print("║  🔮 Oracle Biblico PRO - Web Interface                     ║")
-    print("║  Biblical Analysis with Matrix-like Mystique              ║")
-    print("╚════════════════════════════════════════════════════════════╝")
-    print("")
-    print("🌐 Starting server...")
-    print("📱 Access interface: http://localhost:5000")
-    print("")
-    
-    app.run(debug=True, host='0.0.0.0', port=5000)
+
+if __name__ == "__main__":
+    debug = os.getenv("FLASK_DEBUG", "0").strip().lower() in {"1", "true", "yes", "on"}
+    host = os.getenv("SHAMIR_HOST", "127.0.0.1")
+    port = int(os.getenv("SHAMIR_PORT", "5000"))
+    app.run(debug=debug, host=host, port=port)

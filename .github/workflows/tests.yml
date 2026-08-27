@@ -29,6 +29,7 @@ jobs:
 
       - name: Run tests
         env:
+          PYTHONPATH: ${{ github.workspace }}
           SHAMIR_ENABLE_RAG: "0"
           SHAMIR_ENABLE_LLM: "0"
-        run: pytest -q
+        run: python -m pytest -q

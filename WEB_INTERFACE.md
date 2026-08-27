@@ -1,302 +1,151 @@
-# 🔮 Oracle Biblico PRO - Web Interface Guide
+# SHAMIR Web Interface and API Guide
 
-## Overview
+This document describes the current Flask interface exposed by SHAMIR. For installation, RAG setup, local Ollama configuration, and project status, see [README.md](README.md) and [QUICK_START.md](QUICK_START.md).
 
-Web interface moderna e misteriosa inspirada em Matrix para análise bíblica com IA.
-
-### Features
-
-✨ **Interface Mysteriosa**
-- Tema dark com símbolos bíblicos
-- Animações fluidas e glowing effects
-- Layout responsivo (mobile + desktop)
-- Real-time analysis updates
-
-🔍 **5-Layer Biblical Analysis**
-- Linguistic (Hebraico/Grego/Aramaico)
-- Numerical (Gematria Values)
-- Historical (Archaeological Context)
-- Theological (Divine Concepts)
-- Integrated (Complete Synthesis)
-
-⚡ **API Backend**
-- Flask REST API
-- CORS enabled
-- JSON responses
-- Health checks
-
----
-
-## Installation & Setup
-
-### 1. Install Dependencies
+## Start the server
 
 ```bash
-# Add Flask and CORS
-pip install flask flask-cors
-
-# Or update requirements.txt
-echo 'flask>=2.3.0' >> requirements.txt
-echo 'flask-cors>=4.0.0' >> requirements.txt
-pip install -r requirements.txt
-```
-
-### 2. Create Template Directories
-
-```bash
-mkdir -p templates/
-mkdir -p static/css/
-mkdir -p static/js/
-```
-
-### 3. Start the Web Server
-
-```bash
-# Ativar ambiente virtual
 source venv/bin/activate
-
-# Rodar servidor Flask
 python3 app.py
-
-# Será acessível em: http://localhost:5000
 ```
 
----
+Default address:
 
-## API Endpoints
-
-### POST /api/analyze
-Executa análise bíblica completa
-
-**Request:**
-```json
-{
-  "query": "Profecia sobre cometa na biblia"
-}
+```text
+http://127.0.0.1:5000
 ```
 
-**Response:**
-```json
-{
-  "status": "success",
-  "query": "Profecia sobre cometa na biblia",
-  "layers": [
-    {"language_layer": {...}},
-    {"numerical_layer": {...}},
-    {"historical_layer": {...}},
-    {"theological_layer": {...}}
-  ],
-  "synthesis": {"integrated_synthesis": {...}}
-}
+You can change the bind address and port with:
+
+```bash
+export SHAMIR_HOST=127.0.0.1
+export SHAMIR_PORT=8000
+python3 app.py
 ```
 
-### GET /api/results
-Retorna últimos resultados de análise
+`FLASK_DEBUG` is off by default.
 
-**Response:**
-```json
-{
-  "status": "success",
-  "results": {...previous analysis...}
-}
-```
+## API endpoints
 
-### GET /api/health
-Verifica saúde do servidor
+### `GET /api/health`
 
-**Response:**
+Reports the service version and the state of optional local components.
+
+Example:
+
 ```json
 {
   "status": "healthy",
-  "service": "Oracle Biblico PRO",
-  "version": "1.0.0"
+  "service": "SHAMIR",
+  "version": "1.1.0",
+  "pipeline": {
+    "rag_enabled": false,
+    "generation_enabled": false,
+    "indexed_documents": null,
+    "llm_model": null,
+    "warnings": []
+  }
 }
 ```
 
----
+### `POST /api/analyze`
 
-## Interface Components
+Request:
 
-### Main Elements
+```json
+{
+  "query": "What evidence supports this interpretation?"
+}
+```
 
-1. **Search Bar** - Input para queries bíblicas
-2. **Analysis Layers** - Cards mostrando cada camada de análise
-3. **Synthesis Panel** - Síntese integrada dos resultados
-4. **Console Output** - Real-time analysis updates
-5. **Bible References** - Links para passagens bíblicas
+Successful responses include:
 
-### Design Philosophy
+- `mode` — whether local RAG and LLM generation are enabled;
+- `sources` — retrieved local documents and metadata;
+- `analysis_layers` — linguistic, numerical, historical, and theological outputs;
+- `synthesis` — integrated output when local generation is available;
+- `warnings` — retrieval or generation problems that should remain visible.
 
-- **Dark Theme** com tons verdes/dourados (Matrix + Bíblico)
-- **Hebrew/Greek** símbolos como decorações
-- **Glow Effects** para destacar elementos importantes
-- **Smooth Animations** para transições
-- **Sacred Geometry** inspiração visual
+Base mode is deliberately transparent: when generation is disabled, analysis layers return `not_generated` rather than synthetic scholarly claims.
 
----
+### `GET /api/results`
 
-## Usage Examples
+Returns the most recent JSON result persisted to:
 
-### Via cURL
+```text
+outputs/analysis_results.json
+```
+
+## cURL examples
+
+Health:
 
 ```bash
-# Análise simples
-curl -X POST http://localhost:5000/api/analyze \
+curl http://127.0.0.1:5000/api/health
+```
+
+Analyze:
+
+```bash
+curl -X POST http://127.0.0.1:5000/api/analyze \
   -H "Content-Type: application/json" \
-  -d '{"query": "Profecia sobre cometa"}'
-
-# Verificar saúde
-curl http://localhost:5000/api/health
+  -d '{"query":"What evidence supports this interpretation?"}'
 ```
 
-### Via Python
-
-```python
-import requests
-import json
-
-response = requests.post(
-    'http://localhost:5000/api/analyze',
-    json={'query': 'Profecia sobre cometa'}
-)
-
-results = response.json()
-print(json.dumps(results, indent=2, ensure_ascii=False))
-```
-
-### Via JavaScript (Fetch)
+## JavaScript example
 
 ```javascript
-fetch('/api/analyze', {
+const response = await fetch('/api/analyze', {
   method: 'POST',
   headers: {'Content-Type': 'application/json'},
-  body: JSON.stringify({query: 'Profecia sobre cometa'})
-})
-.then(r => r.json())
-.then(data => console.log(data));
+  body: JSON.stringify({query: 'What evidence supports this interpretation?'})
+});
+
+const data = await response.json();
+console.log(data);
 ```
 
----
+## Local RAG / LLM status
 
-## Integration com OpenWebUI
-
-### Opção 1: Direct Integration
+To enable the bundled RAG demo:
 
 ```bash
-# Se OpenWebUI está em localhost:3000
-# Conectar análises do Oracle Biblico ao OpenWebUI
-
-curl http://localhost:5000/api/results | \
-  curl -X POST http://localhost:3000/api/chat \
-    -H "Content-Type: application/json" \
-    -d @-
+ollama pull nomic-embed-text
+python3 scripts/build_rag.py
+export SHAMIR_ENABLE_RAG=1
+python3 app.py
 ```
 
-### Opção 2: Via API Gateway
-
-Criar endpoint que combina ambos:
-
-```python
-@app.route('/api/combined-analysis', methods=['POST'])
-def combined():
-    # Executar análise local
-    local_result = pipeline.analyze(query)
-    
-    # Enviar para OpenWebUI
-    openwebui_result = requests.post(
-        'http://localhost:3000/api/chat',
-        json={'content': str(local_result)}
-    )
-    
-    return jsonify({
-        'oracle': local_result,
-        'openwebui': openwebui_result.json()
-    })
-```
-
----
-
-## File Structure
-
-```
-oracle-biblico-pro/
-├── app.py                          # Flask backend
-├── templates/
-│   └── index.html                 # Interface principal
-├── static/
-│   ├── css/
-│   │   └── style.css              # Estilos Matrix + Bíblico
-│   └── js/
-│       └── interface.js           # Interatividade
-├── scripts/
-│   └── analysis_pipeline.py       # Core analysis
-├── outputs/
-│   └── analysis_results.json      # Últimos resultados
-└── requirements.txt               # Dependências Python
-```
-
----
-
-## Troubleshooting
-
-### Port 5000 já em uso
+To add local generation:
 
 ```bash
-# Usar porta diferente
-python3 app.py --port 8000
-
-# Ou matar processo existente
-lsof -ti:5000 | xargs kill -9
+ollama pull llama3.1
+export SHAMIR_ENABLE_RAG=1
+export SHAMIR_ENABLE_LLM=1
+export SHAMIR_LLM_MODEL=llama3.1
+python3 app.py
 ```
 
-### CORS Errors
+Always confirm the current pipeline state with `/api/health`.
 
-```python
-# Adicionar origins customizados
-CORS(app, resources={
-    r"/api/*": {"origins": ["http://localhost:3000"]}
-})
-```
+## Input and error behavior
 
-### Analysis takes too long
+- empty queries return HTTP `400`;
+- queries longer than `SHAMIR_MAX_QUERY_LENGTH` return HTTP `400`;
+- internal server exceptions are logged but are not returned verbatim to the client;
+- Ollama generation failures are represented as `generation_failed` plus a warning instead of crashing the full request when possible.
 
-```python
-# Adicionar timeout
-@app.route('/api/analyze', methods=['POST'])
-def analyze():
-    # ...
-    result = pipeline.analyze(query)  # Aumentar timeout se necessário
-```
+## UI notes
 
----
+The repository includes the existing HTML/CSS/JavaScript interface under `templates/` and `static/`. The UI is currently a lightweight research front-end over the Flask API, not a claim of production readiness.
 
-## Performance Tips
+## Security notes
 
-1. **Cache Results** - Guardar análises frequentes
-2. **Async Processing** - Usar Celery para tasks longas
-3. **Database** - SQLite para persistência de resultados
-4. **Rate Limiting** - Proteger API de abuso
+- do not expose the development Flask server directly to the public internet;
+- do not index secrets, credentials, or private data unless you understand the storage implications;
+- treat local model output as untrusted content;
+- review [SECURITY.md](SECURITY.md) before building a public service on top of SHAMIR.
 
----
+## Current limitations
 
-## Next Steps
-
-- [ ] Criar HTML interface (index.html)
-- [ ] Estilizar com CSS mystérioso (style.css)
-- [ ] Adicionar JavaScript interativo (interface.js)
-- [ ] Integrar com banco de dados
-- [ ] Adicionar autenticação
-- [ ] Deploy em produção (Heroku/AWS)
-
----
-
-## Support
-
-Para dúvidas ou bugs:
-1. Check logs: `tail -f logs/app.log`
-2. Test API: `curl http://localhost:5000/api/health`
-3. Verify pipeline: `python3 scripts/analysis_pipeline.py 'test query'`
-
----
-
-**Oracle Biblico PRO** © 2025 | Matrix-like Biblical Analysis with AI
+SHAMIR does not currently provide authentication, rate limiting, multi-user isolation, formal academic citation management, or production deployment configuration. Those should be added before any public multi-user deployment.

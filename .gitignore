@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+venv/
+.venv/
+
+# Local configuration / secrets
+.env
+.env.local
+*.pem
+*.key
+
+# Generated SHAMIR state
+outputs/
+logs/
+data/vector_db/
+data/models/
+data/raw/
+data/processed/
+static/audio/*.wav
+
+# OS / editors
+.DS_Store
+.vscode/
+.idea/

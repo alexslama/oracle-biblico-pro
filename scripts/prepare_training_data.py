@@ -1,74 +1,72 @@
 #!/usr/bin/env python3
+"""Convert SHAMIR demo metadata into a small JSONL development fixture.
+
+This utility is intentionally limited: it does not create a scholarly corpus,
+it does not scrape copyrighted text, and it does not produce sufficient data
+for real model fine-tuning. It exists only to exercise local data pipelines.
 """
-Oracle Biblico PRO - Training Data Preparation
-Processes Bible texts into training dataset format
-"""
+
+from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import List, Dict
+from typing import Any, Dict, List
 
-class TrainingDataPreparator:
-    """Prepares biblical texts for fine-tuning Llama3.1"""
-    
+
+class DemoDataPreparator:
+    """Prepare metadata-only JSONL records for development tests."""
+
     def __init__(self, data_dir: str = "data"):
         self.data_dir = Path(data_dir)
         self.processed_dir = self.data_dir / "processed"
         self.processed_dir.mkdir(parents=True, exist_ok=True)
-    
-    def load_raw_data(self) -> Dict:
-        """Loads raw Bible texts from data/raw/"""
-        print("Loading raw Bible data...")
-        raw_file = self.data_dir / "raw" / "bible_metadata.json"
-        
-        if raw_file.exists():
-            with open(raw_file, "r", encoding="utf-8") as f:
-                return json.load(f)
-        return {"books": []}
-    
-    def create_training_samples(self, data: Dict) -> List[str]:
-        """Creates training samples from Bible texts"""
-        print("Creating training samples...")
-        samples = []
-        
-        for book in data.get("books", []):
-            sample = {
-                "text": f"{book['name']} - {book['chapters']} chapters",
-                "languages": book.get("languages", []),
-                "metadata": {
-                    "book_name": book['name'],
-                    "chapter_count": book['chapters'],
-                    "verse_count": book['verses']
-                }
-            }
-            samples.append(json.dumps(sample, ensure_ascii=False))
-        
-        return samples
-    
-    def save_training_data(self, samples: List[str]):
-        """Saves training data to processed directory"""
-        output_file = self.processed_dir / "training_data.jsonl"
-        
-        with open(output_file, "w", encoding="utf-8") as f:
-            for sample in samples:
-                f.write(sample + "\n")
-        
-        print(f"✓ Saved {len(samples)} training samples to {output_file}")
-    
-    def prepare(self):
-        """Main preparation pipeline"""
-        data = self.load_raw_data()
-        samples = self.create_training_samples(data)
-        self.save_training_data(samples)
-        print("\n✅ Training data preparation complete!")
 
-def main():
-    print("="*50)
-    print("Oracle Biblico PRO - Training Data Preparation")
-    print("="*50)
-    
-    preparator = TrainingDataPreparator()
-    preparator.prepare()
+    def load_demo_metadata(self) -> Dict[str, Any]:
+        source = self.data_dir / "raw" / "bible_metadata.json"
+        if not source.exists():
+            return {"books": []}
+        with source.open("r", encoding="utf-8") as handle:
+            return json.load(handle)
+
+    def create_records(self, data: Dict[str, Any]) -> List[Dict[str, Any]]:
+        records: List[Dict[str, Any]] = []
+        for book in data.get("books", []):
+            name = str(book.get("name", "")).strip()
+            chapters = book.get("chapters")
+            if not name:
+                continue
+            records.append(
+                {
+                    "text": (
+                        f"SHAMIR development metadata note: {name} is represented "
+                        f"in this fixture with {chapters} chapters. This is metadata, not source text."
+                    ),
+                    "metadata": {
+                        "book_name": name,
+                        "chapter_count": chapters,
+                        "kind": "demo-metadata",
+                    },
+                }
+            )
+        return records
+
+    def save_records(self, records: List[Dict[str, Any]]) -> Path:
+        output = self.processed_dir / "metadata_fixture.jsonl"
+        with output.open("w", encoding="utf-8") as handle:
+            for record in records:
+                handle.write(json.dumps(record, ensure_ascii=False) + "\n")
+        return output
+
+    def prepare(self) -> Path:
+        data = self.load_demo_metadata()
+        return self.save_records(self.create_records(data))
+
+
+def main() -> None:
+    output = DemoDataPreparator().prepare()
+    print(f"Development metadata fixture written to {output}")
+    print("No scholarly corpus or model-training dataset was created.")
+
 
 if __name__ == "__main__":
     main()

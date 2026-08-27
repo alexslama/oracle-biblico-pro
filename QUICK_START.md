@@ -1,94 +1,109 @@
-# 🚀 Oracle Biblico PRO - QUICK START
+# SHAMIR Quick Start
 
-## UM COMANDO PARA DEPLOY COMPLETO
+SHAMIR can run in base mode with no local model, or in local RAG/LLM mode with Ollama.
 
-Seu sistema está pronto! Execute isto no Terminal do seu Mac M1 Max:
-
-```bash
-bash <(curl -s https://raw.githubusercontent.com/alexslama/oracle-biblico-pro/main/DEPLOY_M1_MAC.sh)
-```
-
-OU, se preferir fazer manualmente:
+## 1. Clone and install
 
 ```bash
 git clone https://github.com/alexslama/oracle-biblico-pro.git
 cd oracle-biblico-pro
-bash DEPLOY_M1_MAC.sh
-```
-
-## O que vai acontecer?
-
-O script `DEPLOY_M1_MAC.sh` executa automaticamente:
-
-1. ✅ Verifica Python 3.10+
-2. ✅ Clona o repositório
-3. ✅ Cria ambiente virtual
-4. ✅ Instala 30+ dependências
-5. ✅ Cria estrutura de diretórios
-6. ✅ Ativa otimizações Metal (M1 Max)
-7. ✅ Coleta textos bíblicos
-8. ✅ Prepara dados de treinamento
-9. ✅ Configura fine-tuning Llama3.1
-10. ✅ Constrói sistema RAG
-
-**Tempo estimado: 15-20 minutos**
-
-## Após o Deployment
-
-```bash
-# Ativar ambiente (sempre que abrir novo terminal)
-cd oracle-biblico-pro
+bash setup.sh
 source venv/bin/activate
-
-# Executar análise bíblica
-python3 scripts/analysis_pipeline.py "Profecia sobre cometa na biblia"
-
-# Ver resultados
-cat outputs/analysis_results.json | python3 -m json.tool
 ```
 
-## Arquivos Principais
+The setup script installs the runtime dependencies from `requirements.txt` and creates the local working directories. It does **not** download a biblical corpus, fine-tune a model, or create cloud resources.
 
-| Arquivo | Função |
-|---------|--------|
-| `DEPLOY_M1_MAC.sh` | Script de deployment automático |
-| `setup.sh` | Configuração manual do ambiente |
-| `requirements.txt` | Dependências Python (30+ pacotes) |
-| `scripts/collect_data.py` | Coleta textos bíblicos |
-| `scripts/prepare_training_data.py` | Prepara dados em formato JSONL |
-| `scripts/finetune_llama.py` | Configura fine-tuning Llama3.1 |
-| `scripts/build_rag.py` | Constrói sistema RAG com FAISS |
-| `scripts/analysis_pipeline.py` | Análise de 5 camadas (seu Oracle) |
+## 2. Run base mode
 
-## Troubleshooting
-
-**Python não encontrado**
 ```bash
-brew install python@3.10
+python3 app.py
 ```
 
-**Permissão negada no script**
-```bash
-chmod +x DEPLOY_M1_MAC.sh
-bash DEPLOY_M1_MAC.sh
+Open:
+
+```text
+http://127.0.0.1:5000
 ```
 
-**Llama3.1 não carrega**
+Base mode is intentionally transparent: without local generation enabled, analysis layers return `not_generated` instead of pretending to have produced scholarly conclusions.
+
+## 3. Enable the bundled RAG demo
+
+Install/start Ollama, then pull an embedding model:
+
 ```bash
-brew install ollama
+ollama pull nomic-embed-text
+```
+
+Build the ChromaDB index from the redistribution-safe demo corpus:
+
+```bash
+python3 scripts/build_rag.py
+```
+
+Enable retrieval:
+
+```bash
+export SHAMIR_ENABLE_RAG=1
+python3 app.py
+```
+
+`data/demo_corpus.jsonl` contains only small SHAMIR-authored demonstration notes. It is not a scholarly corpus.
+
+## 4. Enable local LLM generation
+
+Pull a local chat model:
+
+```bash
 ollama pull llama3.1
 ```
 
-## Status do Deployment
+Then run:
 
-✅ **Repositório GitHub**: https://github.com/alexslama/oracle-biblico-pro
+```bash
+export SHAMIR_ENABLE_RAG=1
+export SHAMIR_ENABLE_LLM=1
+export SHAMIR_LLM_MODEL=llama3.1
+python3 app.py
+```
 
-✅ **Todos os arquivos**: README + Scripts + Requirements + Deploy Automation
+The pipeline will retrieve local sources, label them as `S1`, `S2`, etc., and instruct the local model to ground factual claims in that retrieved context.
 
-✅ **Otimizado para**: MacBook M1 Max com 64GB RAM
+## 5. Use your own corpus
 
-✅ **Funcionalidade**: 5-layer biblical analysis pipeline
+Create a JSONL file with one document per line:
 
----
+```json
+{"text":"Your legally usable source text.","metadata":{"source":"Source description"}}
+```
 
-**Pronto para começar? Execute o comando acima e seu Oracle Biblico PRO estará operacional em 20 minutos! 🎉**
+Build an index from it:
+
+```bash
+python3 scripts/build_rag.py --input path/to/your_corpus.jsonl
+```
+
+Use only material you are legally allowed to process and redistribute.
+
+## 6. Run tests
+
+For development:
+
+```bash
+pip install -r requirements-dev.txt
+pytest -q
+```
+
+The same core tests run automatically through GitHub Actions on pull requests.
+
+## Useful endpoints
+
+- `GET /api/health` — service and local AI status
+- `POST /api/analyze` — run a research question
+- `GET /api/results` — retrieve the most recently persisted result
+
+## Current limits
+
+SHAMIR is experimental. Retrieval quality depends on the indexed corpus, local models can still hallucinate, source labels are not formal academic citations, and historical/linguistic/theological claims require independent verification.
+
+For architecture, configuration variables, roadmap, and contribution guidance, see [README.md](README.md) and [CONTRIBUTING.md](CONTRIBUTING.md).

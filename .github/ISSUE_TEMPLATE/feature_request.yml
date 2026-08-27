@@ -1,0 +1,39 @@
+name: Feature request
+description: Propose a focused improvement to SHAMIR
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or research need
+      description: Describe the user or contributor problem before proposing implementation details.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed approach
+      description: Explain the smallest useful change and how it fits SHAMIR's local-first, source-aware design.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence and evaluation
+      description: How would we verify that this feature works without overstating its capabilities?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: checkboxes
+    id: principles
+    attributes:
+      label: Project principles
+      options:
+        - label: This request does not require fabricated adoption, accuracy, or scholarly-authority claims.
+          required: true
+        - label: I will document new external datasets/models and their licensing or provenance requirements.
+          required: true

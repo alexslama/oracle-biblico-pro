@@ -1,87 +1,49 @@
 #!/usr/bin/env python3
+"""Create a small demo metadata manifest for SHAMIR development.
+
+This script does not download Bible texts or scholarly resources. It only
+creates a tiny local metadata fixture that can be used while developing data
+pipelines. Real corpora must be supplied separately with appropriate rights.
 """
-Oracle Biblico PRO - Data Collection Script
-Collects Bible texts and resources for training
-"""
+
+from __future__ import annotations
 
 import json
-import os
 from pathlib import Path
 
-def collect_bible_texts():
-    """
-    Collects Bible texts from various sources
-    Stores in JSON format for processing
-    """
-    print("Collecting Bible texts...")
-    
-    # Create data directories
-    Path("data/raw").mkdir(parents=True, exist_ok=True)
-    
-    # Sample Bible texts structure
-    bible_data = {
-        "testament": "Old Testament",
+
+def create_demo_metadata(output_path: str | Path = "data/raw/bible_metadata.json") -> Path:
+    output = Path(output_path)
+    output.parent.mkdir(parents=True, exist_ok=True)
+
+    demo_data = {
+        "status": "demo_metadata_only",
+        "warning": "No biblical text is included in this file.",
         "books": [
             {
                 "name": "Genesis",
                 "chapters": 50,
-                "verses": 1533,
-                "languages": ["Hebrew", "English", "Portuguese"]
+                "languages": ["Hebrew", "translation-dependent"],
             },
             {
                 "name": "Exodus",
                 "chapters": 40,
-                "verses": 1213,
-                "languages": ["Hebrew", "English", "Portuguese"]
-            }
-        ]
+                "languages": ["Hebrew", "translation-dependent"],
+            },
+        ],
     }
-    
-    # Save Bible metadata
-    with open("data/raw/bible_metadata.json", "w", encoding="utf-8") as f:
-        json.dump(bible_data, f, ensure_ascii=False, indent=2)
-    
-    print(f"✓ Collected metadata for {len(bible_data['books'])} books")
 
-def collect_reference_texts():
-    """
-    Collects reference texts for context
-    - Hebrew grammar references
-    - Aramaic references  
-    - Greek references
-    """
-    print("Collecting reference texts...")
-    
-    references = {
-        "linguistic_resources": {
-            "hebrew_grammar": "data/references/hebrew_grammar.txt",
-            "aramaic_references": "data/references/aramaic.txt",
-            "greek_references": "data/references/greek.txt"
-        },
-        "theological_references": {
-            "commentary_collection": "data/references/commentaries.json",
-            "historical_context": "data/references/history.json"
-        }
-    }
-    
-    print(f"✓ Catalogued {len(references)} reference collections")
-    return references
+    with output.open("w", encoding="utf-8") as handle:
+        json.dump(demo_data, handle, ensure_ascii=False, indent=2)
 
-def main():
-    print("="*50)
-    print("Oracle Biblico PRO - Data Collection")
-    print("="*50)
-    
-    try:
-        collect_bible_texts()
-        refs = collect_reference_texts()
-        
-        print("\n✅ Data collection completed successfully!")
-        print(f"References: {refs}")
-        
-    except Exception as e:
-        print(f"❌ Error during collection: {e}")
-        raise
+    return output
+
+
+def main() -> None:
+    output = create_demo_metadata()
+    print(f"Demo metadata written to {output}")
+    print("No corpus or external reference text was downloaded.")
+
 
 if __name__ == "__main__":
     main()

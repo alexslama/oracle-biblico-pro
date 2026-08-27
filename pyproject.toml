@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "shamir-local-rag"
+version = "0.2.0"
+description = "Local-first source-aware research toolkit with optional Ollama and ChromaDB RAG"
+readme = "README.md"
+requires-python = ">=3.12"
+license = {file = "LICENSE"}
+authors = [{name = "Alex Slama"}]
+keywords = ["rag", "ollama", "chromadb", "local-ai", "research"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+  "Flask>=3.0,<4.0",
+  "flask-cors>=4.0,<6.0",
+  "python-dotenv>=1.0,<2.0",
+  "ollama>=0.6.0",
+  "chromadb>=0.4,<2.0",
+]
+
+[project.scripts]
+shamir = "shamir.cli:main"
+
+[project.urls]
+Repository = "https://github.com/alexslama/oracle-biblico-pro"
+Issues = "https://github.com/alexslama/oracle-biblico-pro/issues"
+
+[tool.setuptools.packages.find]
+include = ["shamir*", "scripts*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

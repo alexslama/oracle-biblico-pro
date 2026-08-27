@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use SHAMIR in research or tooling, please cite the software repository and version used."
+title: "SHAMIR: Local-First Source-Aware Research Toolkit"
+type: software
+authors:
+  - family-names: Slama
+    given-names: Alex
+repository-code: "https://github.com/alexslama/oracle-biblico-pro"
+url: "https://github.com/alexslama/oracle-biblico-pro"
+license: MIT
+version: 0.2.0

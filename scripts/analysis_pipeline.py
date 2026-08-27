@@ -119,11 +119,7 @@ class BiblicalAnalysisPipeline:
     def _default_generator(self) -> Optional[Any]:
         if not _enabled("SHAMIR_ENABLE_LLM"):
             return None
-        try:
-            return OllamaGenerator(os.getenv("SHAMIR_LLM_MODEL", "llama3.1"))
-        except Exception as exc:
-            self.warnings.append(f"LLM generation disabled at startup: {exc}")
-            return None
+        return OllamaGenerator(os.getenv("SHAMIR_LLM_MODEL", "llama3.1"))
 
     @staticmethod
     def _source_payload(sources: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -166,6 +162,15 @@ class BiblicalAnalysisPipeline:
             self.warnings.append(f"Retrieval failed for this request: {exc}")
             return []
 
+    def _safe_generate(self, stage: str, system_prompt: str, user_prompt: str) -> Optional[str]:
+        if self.generator is None:
+            return None
+        try:
+            return self.generator.generate(system_prompt, user_prompt)
+        except Exception as exc:
+            self.warnings.append(f"{stage} generation failed: {exc}")
+            return None
+
     def _generate_layer(
         self,
         layer_name: str,
@@ -196,7 +201,13 @@ class BiblicalAnalysisPipeline:
             f"Retrieved context:\n{context}\n\n"
             "Return a concise analysis with explicit uncertainty where appropriate."
         )
-        content = self.generator.generate(system_prompt, user_prompt)
+        content = self._safe_generate(layer_name, system_prompt, user_prompt)
+        if content is None:
+            return {
+                "name": layer_name,
+                "status": "generation_failed",
+                "content": "Local generation failed. Inspect the warnings field and verify the Ollama service/model.",
+            }
         return {"name": layer_name, "status": "generated", "content": content}
 
     def _generate_synthesis(self, query: str, context: str, layers: List[Dict[str, Any]]) -> Dict[str, Any]:
@@ -219,7 +230,13 @@ class BiblicalAnalysisPipeline:
             f"Layer analyses:\n{layer_text}\n\n"
             "Produce an integrated synthesis and a short 'verification needed' section."
         )
-        return {"status": "generated", "content": self.generator.generate(system_prompt, user_prompt)}
+        content = self._safe_generate("synthesis", system_prompt, user_prompt)
+        if content is None:
+            return {
+                "status": "generation_failed",
+                "content": "Integrated synthesis could not be generated. Inspect warnings and verify Ollama.",
+            }
+        return {"status": "generated", "content": content}
 
     def analyze(self, query: str) -> Dict[str, Any]:
         query = str(query or "").strip()
